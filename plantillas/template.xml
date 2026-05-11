@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<Documento tipo="BL" version="1.0">
+    <tipo-accion>I</tipo-accion>
+    <numero-referencia>${bl}</numero-referencia>
+    <service>LINER</service>
+    <tipo-servicio>RoRo</tipo-servicio>
+    <cond-transporte>PP</cond-transporte>
+    <total-bultos>${bultos}</total-bultos>
+    <total-peso>${peso_total}</total-peso>
+    <unidad-peso>KGM</unidad-peso>
+    <total-item>${bultos}</total-item>
+
+    <OpTransporte>
+        <optransporte>
+            <sentido-operacion>I</sentido-operacion>
+            <nombre-nave>${nave}</nombre-nave>
+        </optransporte>
+    </OpTransporte>
+
+    <Flete>
+        <forma-pago-flete>
+            <tipo>PREPAID</tipo>
+            <descripcion>ACCORDING CHARTER PARTY</descripcion>
+        </forma-pago-flete>
+    </Flete>
+
+    <Fechas>
+        <fecha>
+            <nombre>FPRES</nombre>
+            <valor>${fecha_pres}</valor>
+        </fecha>
+        <fecha>
+            <nombre>FEM</nombre>
+            <valor>${fecha_bl}</valor>
+        </fecha>
+    </Fechas>
+
+    <Locaciones>
+        <locacion>
+            <nombre>LE</nombre>
+            <codigo>${pol}</codigo>
+            <descripcion>${pol}</descripcion>
+        </locacion>
+        <locacion>
+            <nombre>PE</nombre>
+            <codigo>${pol}</codigo>
+            <descripcion>${pol}</descripcion>
+        </locacion>
+        <locacion>
+            <nombre>PD</nombre>
+            <codigo>${pod}</codigo>
+            <descripcion>${pod}</descripcion>
+        </locacion>
+    </Locaciones>
+
+    <Participaciones>
+        <participacion>
+            <nombre>CONS</nombre>
+            <nombres>${consignee}</nombres>
+            <direccion>SIN DIRECCION</direccion>
+            <telefono>99999999</telefono>
+        </participacion>
+    </Participaciones>
+
+    <Items>
+        ${items_xml}
+    </Items>
+    
+    ${vehiculo_xml}
+</Documento>
+
+
