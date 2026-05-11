@@ -1,0 +1,29 @@
+# Entorno virtual
+venv/
+ENV/
+.env
+
+# Python (Caché y temporales)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# PyInstaller (Compilación)
+build/
+dist/
+*.spec
+
+# Datos y Salidas (No subir archivos del cliente)
+output/
+*.pdf
+*.xml
+*.log
+
+# Excel (Subir solo el template, no archivos de datos)
+*.xlsx
+!template.xlsx
+
+# Sistema
+.DS_Store
+Thumbs.db
