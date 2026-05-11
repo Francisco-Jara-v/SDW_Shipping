@@ -17,7 +17,6 @@ dist/
 # Datos y Salidas (No subir archivos del cliente)
 output/
 *.pdf
-*.xml
 *.log
 
 # Excel (Subir solo el template, no archivos de datos)
@@ -27,3 +26,4 @@ output/
 # Sistema
 .DS_Store
 Thumbs.db
+app-DESKTOP-992RI7U.py
