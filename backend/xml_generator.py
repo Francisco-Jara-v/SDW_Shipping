@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import re
 
 # -------------------------
 # 🔥 ITEMS DINÁMICOS (SIN VEHÍCULO NI PESO)
@@ -8,6 +8,34 @@ def generar_items_xml(items, datos):
     xml = ""
 
     for i, item in enumerate(items, start=1):
+        contenedor = item.get("delivered_container", "")
+
+        match = re.match(r'^([A-Za-z]{4})(\d{6})(\d)$', contenedor)
+
+        if match:
+            sigla = match.group(1)
+            numero = match.group(2)
+            digito = match.group(3)
+
+            carga_cnt = "S"
+
+            contenedor_xml = f"""
+                <Contenedores>
+                    <contenedor>
+                        <sigla>{sigla}</sigla>
+                        <numero>{numero}</numero>
+                        <digito>{digito}</digito>
+                        <tipo-cnt>42P3</tipo-cnt>
+                        <peso>{int(datos['peso_total'])}</peso>
+                        <nombre-operador>{sigla}</nombre-operador>
+                        <status>LCL/LCL</status>
+                    </contenedor>
+                </Contenedores>
+            """
+        else:
+            carga_cnt = "N"
+            contenedor_xml = ""
+
         xml += f"""
         <item>
             <numero-item>{i}</numero-item>
@@ -19,8 +47,10 @@ def generar_items_xml(items, datos):
             <peso-bruto>{int(datos['peso_total'])}</peso-bruto>
             <unidad-peso>KGM</unidad-peso>
             <observaciones>{item.get('specification', '')}</observaciones>
-            <carga-cnt>N</carga-cnt>
+            <carga-cnt>{carga_cnt}</carga-cnt>
 
+            {contenedor_xml if carga_cnt == "S" else ""}
+            
             <Vehiculos>
                 <vehiculo>
                     <modelo>{datos.get('type', '') or "S/M"}</modelo>

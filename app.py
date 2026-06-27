@@ -275,7 +275,10 @@ def main(page: ft.Page):
                     excel = os.path.join(carpeta_salida["path"], f"{nombre}.xlsx")
                     pdf = os.path.join(carpeta_salida["path"], f"{nombre}.pdf")
                     xml = os.path.join(carpeta_salida["path"], f"{nombre}.xml")
-
+                    pdf_copia = os.path.join(
+                        carpeta_salida["path"],
+                        f"{nombre}_COPIA_NO_NEGOCIABLE.pdf"
+                    )
                     
                     ruta_xml_template = ruta_recursos("plantillas/plantilla.xml")
                     ruta_excel_template = ruta_recursos("plantillas/template.xlsx")
@@ -299,7 +302,20 @@ def main(page: ft.Page):
                         break
                     estado.value = f"Generando PDF: {bl}"
                     page.update()
-                    await asyncio.to_thread(excel_a_pdf, excel, pdf)
+                    await asyncio.to_thread(
+                        excel_a_pdf,
+                        excel,
+                        pdf,
+                        1
+                    )
+                    
+                    # PDF Copia No Negociable (Hoja 2)
+                    await asyncio.to_thread(
+                        excel_a_pdf,
+                        excel,
+                        pdf_copia,
+                        2
+                    )
                     if cancelar["activo"]:
                         estado.value = f"Cancelado en {bl}"
                         estado.color = "red"

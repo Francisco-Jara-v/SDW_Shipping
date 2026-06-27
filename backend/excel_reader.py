@@ -115,12 +115,15 @@ def leer_excel_multiple(ruta):
 
         for _, row in grupo.iterrows():
             spec = limpiar(row.get("SPECIFICATION"))
+            delivered_container = limpiar(row.get("DELIVERED CONTAINER"))
+            
 
             if not spec:
                 continue
 
             items.append({
-                "specification": spec
+                "specification": spec,
+                "delivered_container": delivered_container
             })
 
         if not items:
