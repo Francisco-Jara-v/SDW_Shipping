@@ -1,14 +1,18 @@
 from update_checker import hay_actualizacion
 from version import VERSION
 
-print(f"Versión instalada: {VERSION}")
+print("Versión instalada:", VERSION)
 
 hay, release = hay_actualizacion()
 
 if hay:
-    print("\nHay una nueva versión disponible.")
-    print(f"Versión: {release['version']}")
-    print(f"Nombre: {release['nombre']}")
+
+    print("\nNueva versión encontrada")
+
+    print("Versión:", release["version"])
+
+    print("URL:", release["download_url"])
 
 else:
-    print("\nYa tienes la última versión.")
+
+    print("\nNo hay actualizaciones.")
