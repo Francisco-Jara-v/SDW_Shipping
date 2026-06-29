@@ -2,6 +2,8 @@
 venv/
 ENV/
 .env
+app-DESKTOP-992RI7U.py
+installer.iss
 
 # Python (Caché y temporales)
 __pycache__/
@@ -12,6 +14,7 @@ __pycache__/
 # PyInstaller (Compilación)
 build/
 dist/
+dist_installer/
 *.spec
 
 # Datos y Salidas (No subir archivos del cliente)
@@ -24,6 +27,6 @@ output/
 !template.xlsx
 
 # Sistema
+
 .DS_Store
 Thumbs.db
-app-DESKTOP-992RI7U.py
