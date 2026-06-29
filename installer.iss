@@ -1,11 +1,11 @@
 [Setup]
 AppName=SDW Generator
-AppVersion=1.0
+AppVersion=1.0.1
 ; Se recomienda usar {autopf} para que se adapte a 32/64 bits automáticamente
 DefaultDirName={autopf}\SDW_Generator
 DefaultGroupName=SDW Generator
 OutputDir=dist_installer
-OutputBaseFilename=SDW_Installer_v1.0
+OutputBaseFilename=SDW_Installer_v1.0.1
 Compression=lzma
 SolidCompression=yes
 ; Privilegios administrativos para instalar en Program Files
