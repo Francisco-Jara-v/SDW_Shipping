@@ -136,28 +136,43 @@ def leer_excel_multiple(ruta):
         tipo = limpiar(fila.get("TYPE"))
         vin = limpiar(fila.get("VIN"))
         transit = limpiar(fila.get("TRANSIT"))
+        otro = limpiar(fila.get("OTRO")) if "OTRO" in df.columns else ""
 
         # -------------------------
         # PESO TOTAL (desde columna, no por item)
         # -------------------------
         peso_total = to_float(fila.get("WEIGHT"))
         freight = to_float(fila.get("FREIGHT FOR BL"))
-
+        # -------------------------
+        # DATOS CONSIGNEE
+        # -------------------------
+        consignee = limpiar(fila.get("CONSIGNEE"))
+        direccion = limpiar(fila.get("DIRECCION"))
+        ciudad = limpiar(fila.get("CIUDAD Y PAIS"))
         # -------------------------
         # DATOS FINALES
         # -------------------------
         datos = {
+            
             "bl_completo": limpiar(bl),
             "bl": extraer_bl_hijo(bl),
             "nit": str(limpiar(fila.get("NIT"))).replace(".0", "") if "NIT" in df.columns else "",
             "pol": limpiar(fila.get("POL")),
             "pod": limpiar(fila.get("POD")),
             "consignee": limpiar(fila.get("CONSIGNEE")),
+            "direccion": limpiar(fila.get("DIRECCION")) if "DIRECCION" in df.columns else "",
+            "ciudad": limpiar(fila.get("CIUDAD Y PAIS")) if "CIUDAD Y PAIS" in df.columns else "",
+            "consignee_completo": "\n".join(
+                x for x in [consignee, direccion, ciudad] if x
+            ),
             "fecha_bl": formatear_fecha(limpiar(fila.get("DATE OF BL"))),
             "fecha_pres": fecha_actual(),
             "nave": limpiar(fila.get("NAVE")) if "NAVE" in df.columns else "",
             "transit": limpiar(fila.get("TRANSIT")),
-
+            "forwarding": limpiar(fila.get("FORWARDING AGENT")) if "FORWARDING AGENT" in df.columns else "",
+            
+            "vessel": limpiar(fila.get("VESSEL NAME & VOY. N")) if "VESSEL NAME & VOY. N" in df.columns else "",
+            "currency": limpiar(fila.get("CURRENCY IS")) if "CURRENCY IS" in df.columns else "",
             # 🔥 CAMBIOS IMPORTANTES
             "peso_total": peso_total,
             "bultos": len(items),
@@ -168,7 +183,8 @@ def leer_excel_multiple(ruta):
             # 🚛 VEHÍCULO FUERA DE ITEMS
             "make": make,
             "type": tipo,
-            "vin": vin
+            "vin": vin,
+            "otro": otro
         }
 
         resultados.append(datos)

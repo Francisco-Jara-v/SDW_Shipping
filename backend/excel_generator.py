@@ -48,12 +48,22 @@ CELDAS = {
     "nave": "B36",
     "pol": "C36",
     "pod": "B38",
-
+    
     "fecha": "E66",
 
     "freight": "B67",
     
-    "total_bultos": "B71",
+    "total_bultos": "B64",
+    
+    "total_peso": "E64",
+    
+# -------------------------
+# CELDAS CAMBIO 23-07-2026
+# -------------------------
+    "forwarding": "E18", 
+    "vessel": "A34",
+    "currency": "C67",
+    
 
 }
 
@@ -141,13 +151,13 @@ def escribir_datos_fijos(ws, datos):
     ws[celda].alignment = ALIGN_LEFT
 
     # Consignee
-    celda = set_valor(ws, CELDAS["consignee1"], datos.get("consignee", ""))
+    celda = set_valor(ws, CELDAS["consignee1"], datos.get("consignee_completo", ""))
     ws[celda].alignment = ALIGN_LEFT
 
     celda = set_valor(ws, CELDAS["nit1"], datos.get("nit", ""))
     ws[celda].alignment = ALIGN_LEFT
 
-    celda = set_valor(ws, CELDAS["consignee2"], datos.get("consignee", ""))
+    celda = set_valor(ws, CELDAS["consignee2"], datos.get("consignee_completo", ""))
     ws[celda].alignment = ALIGN_LEFT
 
     celda = set_valor(ws, CELDAS["nit2"], datos.get("nit", ""))
@@ -161,6 +171,16 @@ def escribir_datos_fijos(ws, datos):
     ws[celda].alignment = ALIGN_LEFT
 
     celda = set_valor(ws, CELDAS["pod"], datos.get("pod", ""))
+    ws[celda].alignment = ALIGN_LEFT
+
+    #CAMBIOS 23-07-2026
+    celda = set_valor(ws, CELDAS["forwarding"], datos.get("forwarding", ""))
+    ws[celda].alignment = ALIGN_LEFT
+    
+    celda = set_valor(ws, CELDAS["vessel"], datos.get("vessel", ""))
+    ws[celda].alignment = ALIGN_LEFT
+    
+    celda = set_valor(ws, CELDAS["currency"], datos.get("currency", ""))
     ws[celda].alignment = ALIGN_LEFT
 
     # Shipping
@@ -201,10 +221,24 @@ def escribir_totales(ws, datos):
     ws[celda].alignment = ALIGN_CENTER
     
     # Bultos
+    total_bultos = datos.get("bultos", 0)
     celda = set_valor(
         ws,
-        CELDAS["total_bultos"],
-        datos.get("bultos", 0)
+        f"{CELDAS['total_bultos']}",
+        f"Total Bultos: {total_bultos}" if total_bultos else "",
+        
+    )
+
+    ws[celda].alignment = ALIGN_CENTER
+    
+    # Peso total
+    total_peso = datos.get("peso_total", 0)
+    celda = set_valor(
+        ws,
+        
+        CELDAS["total_peso"],
+        f"Total Peso: {total_peso}" if total_peso else "",
+        
     )
 
     ws[celda].alignment = ALIGN_CENTER
@@ -295,6 +329,7 @@ def escribir_vehiculo(ws, datos, fila):
     make = datos.get("make", "")
     tipo = datos.get("type", "")
     vin = datos.get("vin", "")
+    otro = datos.get("otro", "")
     transit = datos.get("transit", "")
 
     if make:
@@ -325,6 +360,17 @@ def escribir_vehiculo(ws, datos, fila):
             ws,
             f"{TABLA['descripcion']}{fila}",
             f"Chasis: {vin}"
+        )
+
+        ws[celda].alignment = ALIGN_LEFT
+        fila += 1
+
+    if otro:
+
+        celda = set_valor(
+            ws,
+            f"{TABLA['descripcion']}{fila}",
+            f"{otro}"
         )
 
         ws[celda].alignment = ALIGN_LEFT
