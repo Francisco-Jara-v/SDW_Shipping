@@ -151,14 +151,28 @@ def escribir_datos_fijos(ws, datos):
     ws[celda].alignment = ALIGN_LEFT
 
     # Consignee
-    celda = set_valor(ws, CELDAS["consignee1"], datos.get("consignee_completo", ""))
-    ws[celda].alignment = ALIGN_LEFT
+    consignee = datos.get("consignee", "")
+    direccion = datos.get("direccion", "")
+    ciudad = datos.get("ciudad", "")
+    celda = set_valor(
+        ws,
+        f"{CELDAS['consignee1']}",
+        f"{consignee} {direccion} {ciudad} " ,
+        
+    )
 
     celda = set_valor(ws, CELDAS["nit1"], datos.get("nit", ""))
     ws[celda].alignment = ALIGN_LEFT
 
-    celda = set_valor(ws, CELDAS["consignee2"], datos.get("consignee_completo", ""))
-    ws[celda].alignment = ALIGN_LEFT
+    consignee = datos.get("consignee", "")
+    direccion = datos.get("direccion", "")
+    ciudad = datos.get("ciudad", "")
+    celda = set_valor(
+        ws,
+        f"{CELDAS['consignee2']}",
+        f"{consignee} {direccion} {ciudad} " ,
+        
+    )
 
     celda = set_valor(ws, CELDAS["nit2"], datos.get("nit", ""))
     ws[celda].alignment = ALIGN_LEFT
@@ -175,7 +189,7 @@ def escribir_datos_fijos(ws, datos):
 
     #CAMBIOS 23-07-2026
     celda = set_valor(ws, CELDAS["forwarding"], datos.get("forwarding", ""))
-    ws[celda].alignment = ALIGN_LEFT
+    #ws[celda].alignment = ALIGN_LEFT
     
     celda = set_valor(ws, CELDAS["vessel"], datos.get("vessel", ""))
     ws[celda].alignment = ALIGN_LEFT
@@ -235,11 +249,11 @@ def escribir_totales(ws, datos):
     total_peso = datos.get("peso_total", 0)
     celda = set_valor(
         ws,
-        
         CELDAS["total_peso"],
         f"Total Peso: {total_peso}" if total_peso else "",
         
     )
+    ws[celda].number_format = "#,##0"
 
     ws[celda].alignment = ALIGN_CENTER
 
@@ -381,7 +395,7 @@ def escribir_vehiculo(ws, datos, fila):
         celda = set_valor(
             ws,
             f"{TABLA['descripcion']}{fila}",
-            f"Transit: {transit}"
+            f"{transit}"
         )
 
         ws[celda].alignment = ALIGN_LEFT

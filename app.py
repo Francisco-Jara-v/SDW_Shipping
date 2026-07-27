@@ -274,11 +274,12 @@ def main(page: ft.Page):
 
                     excel = os.path.join(carpeta_salida["path"], f"{nombre}.xlsx")
                     pdf = os.path.join(carpeta_salida["path"], f"{nombre}.pdf")
-                    xml = os.path.join(carpeta_salida["path"], f"{nombre}.xml")
                     pdf_copia = os.path.join(
-                        carpeta_salida["path"],
-                        f"{nombre}_COPIA_NO_NEGOCIABLE.pdf"
-                    )
+                                            carpeta_salida["path"],
+                                            f"{nombre}_COPIA_NO_NEGOCIABLE.pdf"
+                                        )
+                    xml = os.path.join(carpeta_salida["path"], f"{nombre}.xml")
+                    
                     
                     ruta_xml_template = ruta_recursos("plantillas/plantilla.xml")
                     ruta_excel_template = ruta_recursos("plantillas/template.xlsx")

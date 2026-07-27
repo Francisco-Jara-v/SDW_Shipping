@@ -17,11 +17,11 @@ VSVersionInfo(
           [
             StringStruct('CompanyName', 'SDW Shipping Chile SpA'),
             StringStruct('FileDescription', 'Generador de Documentos BL'),
-            StringStruct('FileVersion', '1.0.0'),
+            StringStruct('FileVersion', '2.0.0'),
             StringStruct('InternalName', 'SDW_Generador'),
             StringStruct('OriginalFilename', 'SDW_Generator.exe'),
             StringStruct('ProductName', 'SDW Generador'),
-            StringStruct('ProductVersion', '1.0.0')
+            StringStruct('ProductVersion', '2.0.0')
           ]
         )
       ]
