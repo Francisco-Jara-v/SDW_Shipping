@@ -123,7 +123,8 @@ def leer_excel_multiple(ruta):
 
             items.append({
                 "specification": spec,
-                "delivered_container": delivered_container
+                "delivered_container": delivered_container,
+                "peso": to_float(row.get("WEIGHT"))
             })
 
         if not items:
@@ -141,7 +142,7 @@ def leer_excel_multiple(ruta):
         # -------------------------
         # PESO TOTAL (desde columna, no por item)
         # -------------------------
-        peso_total = to_float(fila.get("WEIGHT"))
+        peso_total = sum(item["peso"] for item in items)
         freight = to_float(fila.get("FREIGHT FOR BL"))
         # -------------------------
         # DATOS CONSIGNEE
@@ -165,9 +166,10 @@ def leer_excel_multiple(ruta):
             "consignee_completo": "\n".join(
                 x for x in [consignee, direccion, ciudad] if x
             ),
+            "collect": limpiar(fila.get("COLLECT / PREPAID")) if "COLLECT / PREPAID" in df.columns else "",
             "fecha_bl": formatear_fecha(limpiar(fila.get("DATE OF BL"))),
             "fecha_pres": fecha_actual(),
-            "nave": limpiar(fila.get("NAVE")) if "NAVE" in df.columns else "",
+            #"nave": limpiar(fila.get("NAVE")) if "NAVE" in df.columns else "",
             "transit": limpiar(fila.get("TRANSIT")),
             "forwarding": limpiar(fila.get("FORWARDING AGENT")) if "FORWARDING AGENT" in df.columns else "",
             

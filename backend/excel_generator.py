@@ -45,7 +45,7 @@ CELDAS = {
 
     "shipping": "B21",
 
-    "nave": "B36",
+    #"nave": "B36",
     "pol": "C36",
     "pod": "B38",
     
@@ -61,8 +61,9 @@ CELDAS = {
 # CELDAS CAMBIO 23-07-2026
 # -------------------------
     "forwarding": "E18", 
-    "vessel": "A34",
+    "vessel": "A36",
     "currency": "C67",
+    "collect": "C69",
     
 
 }
@@ -178,8 +179,8 @@ def escribir_datos_fijos(ws, datos):
     ws[celda].alignment = ALIGN_LEFT
 
     # Nave
-    celda = set_valor(ws, CELDAS["nave"], datos.get("nave", ""))
-    ws[celda].alignment = ALIGN_LEFT
+    #celda = set_valor(ws, CELDAS["nave"], datos.get("nave", ""))
+    #ws[celda].alignment = ALIGN_LEFT
 
     celda = set_valor(ws, CELDAS["pol"], datos.get("pol", ""))
     ws[celda].alignment = ALIGN_LEFT
@@ -195,6 +196,9 @@ def escribir_datos_fijos(ws, datos):
     ws[celda].alignment = ALIGN_LEFT
     
     celda = set_valor(ws, CELDAS["currency"], datos.get("currency", ""))
+    ws[celda].alignment = ALIGN_LEFT
+    
+    celda = set_valor(ws, CELDAS["collect"], datos.get("collect", ""))
     ws[celda].alignment = ALIGN_LEFT
 
     # Shipping
@@ -247,13 +251,16 @@ def escribir_totales(ws, datos):
     
     # Peso total
     total_peso = datos.get("peso_total", 0)
+    texto = ""
+    
+    if total_peso:
+        texto = f"Total Peso: {int(total_peso):,}".replace(",", ".")
+
     celda = set_valor(
         ws,
         CELDAS["total_peso"],
-        f"Total Peso: {total_peso}" if total_peso else "",
-        
+        texto
     )
-    ws[celda].number_format = "#,##0"
 
     ws[celda].alignment = ALIGN_CENTER
 
@@ -270,14 +277,21 @@ def escribir_items(ws, datos):
     if not items:
         items = [{"specification": ""}]
 
-    peso = datos.get("peso_total", 0)
-
+    
     for i, item in enumerate(items):
 
         fila_actual = fila + i
 
         spec = item.get("specification", "")
         contenedor = item.get("delivered_container", "")
+        peso = item.get("peso", 0)
+            
+        celda = set_valor(
+            ws,
+            f"{TABLA['peso']}{fila_actual}",
+            peso
+        )
+        
 
         # -----------------
         # Container
@@ -321,13 +335,14 @@ def escribir_items(ws, datos):
         # Peso
         # -----------------
 
+        texto_peso = f"{int(peso):,}".replace(",", ".")
+
         celda = set_valor(
             ws,
             f"{TABLA['peso']}{fila_actual}",
-            peso
+            texto_peso
         )
-
-        ws[celda].number_format = "#,##0"
+        
         ws[celda].alignment = ALIGN_CENTER
 
         auto_alto_fila(ws, fila_actual, spec)

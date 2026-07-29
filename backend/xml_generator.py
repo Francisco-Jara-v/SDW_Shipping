@@ -107,7 +107,7 @@ def generar_xml(template_path, output_path, datos):
         "${pod}": datos["pod"],
         "${fecha_bl}": datos["fecha_bl"],
         "${fecha_pres}": datos["fecha_pres"],
-        "${nave}": datos["nave"],
+        #"${nave}": datos["nave"],
         "${items_xml}": items_xml,
         "${vehiculo_xml}": vehiculo_xml,
         "${shipping}": shipping,
