@@ -1,10 +1,10 @@
 [Setup]
 AppName=SDW Generator
-AppVersion=2.0.0
+AppVersion=2.0.1
 DefaultDirName={autopf}\SDW_Generator
 DefaultGroupName=SDW Generator
 OutputDir=dist_installer
-OutputBaseFilename=SDW_Installer_v2.0.0
+OutputBaseFilename=SDW_Installer_v2.0.1
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=admin
