@@ -7,9 +7,18 @@ import re
 from tkinter import filedialog
 import os
 import sys
+import tempfile
+import subprocess
+import threading
+import requests
 from datetime import datetime
 import win32com.client
-
+from update_checker import hay_actualizacion
+from version import VERSION
+import webbrowser
+from urllib.parse import urlparse
+import ctypes
+import time
 
 from backend.marca_agua import agregar_marca_agua
 from backend.excel_reader import leer_excel_multiple
@@ -77,6 +86,177 @@ def main(page: ft.Page):
     cancelar={"activo":False}
     ruta_archivo = {"path": None}
     carpeta_salida = {"path": ""}
+
+    def revisar_actualizaciones(page: ft.Page):
+        """Ejecuta la comprobación y muestra el diálogo directamente en el overlay de la página."""
+
+        async def _tarea_verificacion():
+            try:
+                print(f"[DEBUG] Comprobando actualización. Versión local actual: {VERSION}")
+
+                # Consultamos GitHub en segundo plano sin congelar la interfaz
+                hay, release = await asyncio.to_thread(hay_actualizacion)
+                print(f"[DEBUG] Resultado de hay_actualizacion(): hay={hay}")
+
+                if not hay or not release:
+                    print("[DEBUG] No se requiere actualización.")
+                    return
+
+                # Elementos de control de descarga
+                progress_bar = ft.ProgressBar(visible=False, value=0)
+                status_text = ft.Text("", size=12, color=ft.Colors.GREY_400)
+
+                def cerrar_dialogo(e):
+                    dialog.open = False
+                    page.update()
+
+                def iniciar_actualizacion_automatica(e):
+                    btn_descargar.disabled = True
+                    btn_mas_tarde.disabled = True
+                    progress_bar.visible = True
+                    status_text.value = "Conectando al servidor..."
+                    page.update()
+
+                    async def _tarea_descarga():
+                        try:
+                            url = release.get("download_url")
+
+                            if not url:
+                                status_text.value = "Error: No se encontró la URL de descarga."
+                                btn_mas_tarde.disabled = False
+                                page.update()
+                                return
+
+                            # 1. Extracción limpia de la extensión ignorando parámetros como '?token=...'
+                            parsed_url = urlparse(url)
+                            path_url = parsed_url.path.lower()
+                            file_extension = ".exe" if path_url.endswith(".exe") else (".zip" if path_url.endswith(".zip") else ".exe")
+
+                            temp_dir = tempfile.gettempdir()
+                            version_release = release.get('version', '2.0.0')
+                            installer_path = os.path.join(temp_dir, f"SDW_Setup_{version_release}{file_extension}")
+
+                            print(f"[DEBUG] URL detectada: {url}")
+                            print(f"[DEBUG] Guardando en: {installer_path}")
+
+                            def _descargar_archivo():
+                                response = requests.get(url, stream=True, timeout=30)
+                                response.raise_for_status()
+
+                                total_bytes = int(response.headers.get("content-length", 0))
+                                downloaded = 0
+                                last_update_time = time.time()
+                                last_percentage = -1.0
+
+                                with open(installer_path, "wb") as file:
+                                    for chunk in response.iter_content(chunk_size=65536):
+                                        if not chunk:
+                                            continue
+                                        file.write(chunk)
+                                        downloaded += len(chunk)
+
+                                        if total_bytes > 0:
+                                            porcentaje = downloaded / total_bytes
+                                            pct_100 = round(porcentaje * 100, 1)
+                                            now = time.time()
+
+                                            # Throttling: actualiza UI máximo cada 100ms para evitar lag
+                                            if (now - last_update_time > 0.1 and pct_100 != last_percentage) or downloaded == total_bytes:
+                                                last_update_time = now
+                                                last_percentage = pct_100
+                                                progress_bar.value = porcentaje
+                                                status_text.value = f"Descargando: {pct_100:.1f}%"
+                                                page.update()
+
+                            # Descarga asíncrona en hilo secundario
+                            await asyncio.to_thread(_descargar_archivo)
+
+                            status_text.value = "Ejecutando instalador..."
+                            page.update()
+
+                            # 2. Ejecución con elevación de administrador y cierre limpio de app
+                            if installer_path.lower().endswith(".exe"):
+                                await asyncio.sleep(0.5)
+                                args = "/VERYSILENT /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS"
+
+                                if os.name == "nt":
+                                    print(f"[DEBUG] Solicitando elevación UAC para: {installer_path}")
+                                    resultado = ctypes.windll.shell32.ShellExecuteW(
+                                        None,
+                                        "runas",          # Muestra la ventana UAC de Windows
+                                        installer_path,
+                                        args,             # Parámetros silenciosos de Inno Setup
+                                        None,
+                                        1
+                                    )
+
+                                    if resultado > 32:
+                                        print("[DEBUG] Instalador lanzado. Cerrando aplicación actual...")
+                                        try:
+                                            await page.window.close()
+                                        except Exception:
+                                            pass
+                                        os._exit(0)  # Cierra inmediatamente sin esperar a que se limpien los hilos
+                                    else:
+                                        print(f"[WARN] ShellExecuteW código {resultado}. Probando fallback...")
+                                        subprocess.Popen(f'"{installer_path}" {args}', shell=True)
+                                        os._exit(0)
+                                else:
+                                    subprocess.Popen([installer_path])
+                                    os._exit(0)
+                            else:
+                                status_text.value = f"Descargado en: {installer_path}"
+                                btn_mas_tarde.disabled = False
+                                page.update()
+
+                        except Exception as ex:
+                            print(f"[ERROR DESCARGA] {ex}")
+                            status_text.value = f"Error en descarga: {ex}"
+                            btn_mas_tarde.disabled = False
+                            page.update()
+
+                    page.run_task(_tarea_descarga)
+
+                btn_mas_tarde = ft.TextButton("Más tarde", on_click=cerrar_dialogo)
+                btn_descargar = ft.Button("Actualizar Ahora", on_click=iniciar_actualizacion_automatica)
+
+                # Construcción del diálogo
+                dialog = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Text("🚀 Nueva actualización disponible"),
+                    content=ft.Column(
+                        [
+                            ft.Text(f"Versión instalada: v{VERSION}"),
+                            ft.Text(f"Nueva versión disponible: v{release.get('version', 'S/N')}"),
+                            ft.Divider(),
+                            ft.Text("Novedades:"),
+                            ft.Text(
+                                release.get("descripcion", "Sin detalles"),
+                                size=12,
+                                selectable=True
+                            ),
+                            status_text,
+                            progress_bar,
+                        ],
+                        tight=True,
+                        scroll=ft.ScrollMode.AUTO,
+                        height=200,
+                        width=400,
+                    ),
+                    actions=[btn_mas_tarde, btn_descargar]
+                )
+
+                print("[DEBUG] Agregando diálogo a page.overlay...")
+                page.overlay.append(dialog)
+                dialog.open = True
+                page.update()
+                print("[DEBUG] ¡Diálogo enviado a pantalla con éxito!")
+
+            except Exception as err:
+                print(f"[ERROR EN CHECKER DE ACTUALIZACIONES] {err}")
+
+        page.run_task(_tarea_verificacion)
+
 
     # -------------------------
     # 🎨 COLORES
@@ -169,6 +349,7 @@ def main(page: ft.Page):
         count = sum(1 for r in tabla_rows if r.data.value)
         seleccionados_count.value = f"Seleccionados: {count}"
         page.update()
+    
     
     
         
@@ -273,10 +454,10 @@ def main(page: ft.Page):
                     nombre = limpiar_nombre_archivo(bl)
 
                     excel = os.path.join(carpeta_salida["path"], f"{nombre}.xlsx")
-                    pdf = os.path.join(carpeta_salida["path"], f"{nombre}.pdf")
+                    pdf = os.path.join(carpeta_salida["path"], f"original_{nombre}.pdf")
                     pdf_copia = os.path.join(
                                             carpeta_salida["path"],
-                                            f"{nombre}_COPIA_NO_NEGOCIABLE.pdf"
+                                            f"COPIA_NO_NEGOCIABLE_{nombre}.pdf"
                                         )
                     xml = os.path.join(carpeta_salida["path"], f"{nombre}.xml")
                     
@@ -567,6 +748,8 @@ def main(page: ft.Page):
             expand=True
         )
     )
+    
+    revisar_actualizaciones(page)
 
 
 # -------------------------

@@ -1,45 +1,37 @@
 import requests
+from packaging import version
 from version import VERSION
 
 OWNER = "Francisco-Jara-v"
 REPO = "SDW_Shipping"
-
 API_URL = f"https://api.github.com/repos/{OWNER}/{REPO}/releases/latest"
-
 
 def obtener_release():
     try:
         response = requests.get(API_URL, timeout=10)
         response.raise_for_status()
-
         data = response.json()
 
         download_url = None
-
-        for asset in data["assets"]:
-            if asset["name"] == "SDW.zip":
+        # Buscamos el ejecutable o archivo de instalación dentro del Release
+        for asset in data.get("assets", []):
+            if asset["name"].endswith(".exe") or asset["name"] == "SDW.zip":
                 download_url = asset["browser_download_url"]
                 break
 
+        tag_version = data["tag_name"].lstrip("v").strip()
+
         return {
-            "version": data["tag_name"].lstrip("v"),
-            "nombre": data["name"],
-            "descripcion": data["body"],
-            "download_url": download_url
+            "version": tag_version,
+            "nombre": data.get("name", ""),
+            "descripcion": data.get("body", "Sin detalles de actualización."),
+            "download_url": download_url,
+            "release_url": data.get("html_url")
         }
 
     except Exception as e:
-        print("Error consultando GitHub:", e)
+        print(f"[UpdateChecker] Error consultando GitHub: {e}")
         return None
-
-def comparar_versiones(v1, v2):
-    """
-    Devuelve True si v1 es mayor que v2
-    """
-    a = tuple(map(int, v1.split(".")))
-    b = tuple(map(int, v2.split(".")))
-    return a > b
-
 
 def hay_actualizacion():
     release = obtener_release()
@@ -47,7 +39,11 @@ def hay_actualizacion():
     if release is None:
         return False, None
 
-    if comparar_versiones(release["version"], VERSION):
-        return True, release
+    try:
+        # Uso de packaging.version para manejar semantic versioning correctamente
+        if version.parse(release["version"]) > version.parse(VERSION):
+            return True, release
+    except Exception as e:
+        print(f"[UpdateChecker] Error comparando versiones: {e}")
 
     return False, release

@@ -1,22 +1,24 @@
 [Setup]
 AppName=SDW Generator
 AppVersion=2.0.0
-; Se recomienda usar {autopf} para que se adapte a 32/64 bits automáticamente
 DefaultDirName={autopf}\SDW_Generator
 DefaultGroupName=SDW Generator
 OutputDir=dist_installer
 OutputBaseFilename=SDW_Installer_v2.0.0
 Compression=lzma
 SolidCompression=yes
-; Privilegios administrativos para instalar en Program Files
-PrivilegesRequired=admin 
+PrivilegesRequired=admin
+
+; --- BUENAS PRÁCTICAS PARA AUTO-UPDATES Y ROBUSTEZ ---
+; 1. Identificador único para detectar si la app está en ejecución
+AppMutex=SDW_Generator_Mutex
+
+; 2. Cierra automáticamente instancias previas si están abiertas
+CloseApplications=yes
+RestartApplications=yes
 
 [Files]
-; IMPORTANTE: Apuntar a DIST, no a BUILD
-; Si usaste --onedir (carpeta):
-;Source: "dist\SDW_Generator\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
-
-; Si usaste --onefile (un solo .exe), comenta la línea de arriba y usa esta:
+; Archivo ejecutable principal
 Source: "dist\SDW_Generator.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
@@ -24,4 +26,5 @@ Name: "{group}\SDW Generator"; Filename: "{app}\SDW_Generator.exe"
 Name: "{commondesktop}\SDW Generator"; Filename: "{app}\SDW_Generator.exe"; IconFilename: "{app}\SDW_Generator.exe"
 
 [Run]
-Filename: "{app}\SDW_Generator.exe"; Description: "Ejecutar aplicación"; Flags: nowait postinstall skipifsilent
+; 📌 CORRECCIÓN: Al quitar 'skipifsilent', Inno Setup relanzará la app tanto en modo gráfico como en /VERYSILENT
+Filename: "{app}\SDW_Generator.exe"; Description: "Ejecutar aplicación"; Flags: nowait postinstall
